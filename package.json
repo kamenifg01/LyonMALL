@@ -1,0 +1,27 @@
+{
+  "name": "lyonmall",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamenifg01/LyonMALL.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kamenifg01/LyonMALL/issues"
+  },
+  "homepage": "https://github.com/kamenifg01/LyonMALL#readme",
+  "dependencies": {
+    "express": "^4.20.0",
+    "pg": "^8.12.0"
+  }
+}
