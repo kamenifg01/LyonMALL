@@ -13,56 +13,72 @@ const client = new Client({
 client.connect();
 
 // Ajouter une catégorie
-exports.ajouterCategorie = async (nom, description) => {
+const ajouterCategorie = async (req, res) => {
+    const { nom, description } = req.body;
     const query = `
-    INSERT INTO categories (nom, description)
-    VALUES ($1, $2) RETURNING *;
-  `;
+        INSERT INTO categories (nom, description)
+        VALUES ($1, $2) RETURNING *;
+    `;
     const values = [nom, description];
     try {
-        const res = await client.query(query, values);
-        console.log("Catégorie ajoutée:", res.rows[0]);
+        const result = await client.query(query, values);
+        res.status(201).json(result.rows[0]);
     } catch (err) {
         console.error("Erreur lors de l'ajout de la catégorie:", err);
+        res.status(500).json({ error: 'Erreur lors de l\'ajout de la catégorie.' });
     }
 };
 
 // Modifier une catégorie
-exports.modifierCategorie = async (categorie_id, nom, description) => {
+const modifierCategorie = async (req, res) => {
+    const { categorie_id } = req.params;
+    const { nom, description } = req.body;
     const query = `
-    UPDATE categories 
-    SET nom = $1, description = $2
-    WHERE categorie_id = $3 RETURNING *;
-  `;
+        UPDATE categories 
+        SET nom = $1, description = $2
+        WHERE categorie_id = $3 RETURNING *;
+    `;
     const values = [nom, description, categorie_id];
     try {
-        const res = await client.query(query, values);
-        console.log("Catégorie modifiée:", res.rows[0]);
+        const result = await client.query(query, values);
+        res.status(200).json(result.rows[0]);
     } catch (err) {
         console.error("Erreur lors de la modification de la catégorie:", err);
+        res.status(500).json({ error: 'Erreur lors de la modification de la catégorie.' });
     }
 };
 
 // Supprimer une catégorie
-exports.supprimerCategorie = async (categorie_id) => {
+const supprimerCategorie = async (req, res) => {
+    const { categorie_id } = req.params;
     const query = `
-    DELETE FROM categories WHERE categorie_id = $1 RETURNING *;
-  `;
+        DELETE FROM categories WHERE categorie_id = $1 RETURNING *;
+    `;
     const values = [categorie_id];
     try {
-        const res = await client.query(query, values);
-        console.log("Catégorie supprimée:", res.rows[0]);
+        const result = await client.query(query, values);
+        res.status(200).json(result.rows[0]);
     } catch (err) {
         console.error("Erreur lors de la suppression de la catégorie:", err);
+        res.status(500).json({ error: 'Erreur lors de la suppression de la catégorie.' });
     }
 };
 
 // Lire les catégories
-exports.getCategories = async () => {
+const getCategories = async (req, res) => {
     try {
-        const res = await client.query('SELECT * FROM categories');
-        console.log(res.rows);
+        const result = await client.query('SELECT * FROM categories');
+        res.status(200).json(result.rows);
     } catch (err) {
         console.error('Erreur lors de la récupération des catégories:', err);
+        res.status(500).json({ error: 'Erreur lors de la récupération des catégories.' });
     }
+};
+
+// Exportation des fonctions
+module.exports = {
+    ajouterCategorie,
+    modifierCategorie,
+    supprimerCategorie,
+    getCategories
 };

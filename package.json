@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,12 @@
   },
   "homepage": "https://github.com/kamenifg01/LyonMALL#readme",
   "dependencies": {
+    "@google-cloud/vision": "^4.3.2",
     "express": "^4.20.0",
     "pg": "^8.12.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
   }
 }
