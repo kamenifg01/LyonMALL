@@ -12,24 +12,26 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3  # Mise à jour de l'action checkout à la version v3
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3  # Mise à jour de l'action setup-node à la version v3
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Utilise Node.js 16, ou tu peux aussi utiliser Node.js 18 ou 20 si nécessaire
+          node-version: '16'
 
       - name: Install dependencies
         run: |
-          cd backend
+          cd backend/node  # Modification du chemin pour pointer vers backend/node
           npm install
 
       - name: Run tests
-        run: npm test
+        run: |
+          cd backend/node  # Modification du chemin pour pointer vers backend/node
+          npm test
 
       - name: Build Docker image
         run: |
-          docker build -t backend:latest ./backend
+          docker build -t backend:latest ./backend/node  # Modification du chemin pour le build Docker
 
       - name: Push Docker image to registry
         run: |
