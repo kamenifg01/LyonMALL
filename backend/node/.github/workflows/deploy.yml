@@ -4,12 +4,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-<<<<<<< HEAD
-      - main  # S'assure que le workflow est déclenché sur la branche "main"
-=======
-      - main
->>>>>>> 2ce3679a87aa2731358b22510e382e156cfe9b9b
-
+      - main  # S'as
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,16 +22,11 @@ jobs:
         run: |
           cd backend/node
           npm install
-<<<<<<< HEAD
-=======
-
       # Supprimer ou commenter cette section si tu n'as pas encore de tests
       # - name: Run tests
       #   run: |
       #     cd backend/node
       #     npm test
->>>>>>> 2ce3679a87aa2731358b22510e382e156cfe9b9b
-
       - name: Build Docker image
         run: |
           docker build -t backend:latest ./backend/node
