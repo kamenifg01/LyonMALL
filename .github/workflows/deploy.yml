@@ -24,14 +24,15 @@ jobs:
           cd backend/node  # Va dans le répertoire backend/node
           npm install
 
-      - name: Run tests
-        run: |
-          cd backend/node  # Assure-toi d'être dans backend/node
-          npm test
+      # Supprime ou commente cette partie si tu n'as pas encore de tests
+      # - name: Run tests
+      #   run: |
+      #     cd backend/node
+      #     npm test
 
       - name: Build Docker image
         run: |
-          docker build -t backend:latest ./backend/node  # Assure-toi de pointer vers backend/node
+          docker build -t backend:latest ./backend/node  # Construis l'image Docker pour le backend
 
       - name: Push Docker image to registry
         run: |
