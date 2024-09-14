@@ -1,42 +1,39 @@
 # .github/workflows/deploy.yml
-
 name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main  # Ce workflow se déclenche lors des pushs sur la branche main
+      - main  # ou "master", selon ta configuration
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Le job s'exécute sur une machine virtuelle Ubuntu
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2  # Cette étape clone ton repository
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Spécifie la version de Node.js
+          node-version: '16'
 
       - name: Install dependencies
         run: |
-          cd backend/node
-          npm install  # Installe les dépendances dans le dossier backend
+          cd backend/node  # Va dans le répertoire backend/node
+          npm install
 
       - name: Run tests
-        run: npm test  # Exécute les tests unitaires
+        run: |
+          cd backend/node  # Assure-toi d'être dans backend/node
+          npm test
 
       - name: Build Docker image
         run: |
-          docker build -t backend:latest ./backend  # Construis l'image Docker
+          docker build -t backend:latest ./backend/node  # Assure-toi de pointer vers backend/node
 
-      - name: Log in to DockerHub
+      - name: Push Docker image to registry
         run: |
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin  # Connexion à DockerHub
-
-      - name: Push Docker image to DockerHub
-        run: |
-          docker tag backend:latest your_dockerhub_account/backend:latest  # Tag l'image Docker
-          docker push your_dockerhub_account/backend:latest  # Pousse l'image sur DockerHub
+          docker tag backend:latest your_dockerhub_account/backend:latest
+          docker push your_dockerhub_account/backend:latest
