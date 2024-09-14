@@ -18,11 +18,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'  # Spécifie la version de Node.js
+          node-version: '16'  # Spécifie la version de Node.js
 
       - name: Install dependencies
         run: |
-          cd backend
+          cd backend/node
           npm install  # Installe les dépendances dans le dossier backend
 
       - name: Run tests
