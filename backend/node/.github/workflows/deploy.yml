@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend
+          cd backend/node
           npm install  # Installe les dépendances dans le dossier backend
 
       - name: Run tests
