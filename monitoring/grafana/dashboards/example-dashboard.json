@@ -1,0 +1,81 @@
+{
+ "id": null,
+ "title": "Example Dashboard",
+ "timezone": "browser",
+ "version": 1,
+ "schemaVersion": 27,
+ "refresh": "5s",
+ "panels": [
+  {
+   "type": "graph",
+   "title": "HTTP Requests Rate",
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 9
+   },
+   "targets": [
+    {
+     "expr": "rate(http_requests_total[5m])",
+     "legendFormat": "{{method}}",
+     "intervalFactor": 2,
+     "refId": "A"
+    }
+   ],
+   "xaxis": {
+    "mode": "time",
+    "show": true
+   },
+   "yaxes": [
+    {
+     "format": "short",
+     "label": "Requests per second",
+     "show": true
+    },
+    {
+     "format": "short",
+     "show": true
+    }
+   ]
+  },
+  {
+   "type": "graph",
+   "title": "CPU Usage",
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 12,
+    "h": 9
+   },
+   "targets": [
+    {
+     "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+     "legendFormat": "{{instance}}",
+     "refId": "A"
+    }
+   ],
+   "xaxis": {
+    "mode": "time",
+    "show": true
+   },
+   "yaxes": [
+    {
+     "format": "percent",
+     "label": "CPU Usage (%)",
+     "show": true
+    },
+    {
+     "format": "percent",
+     "show": true
+    }
+   ]
+  }
+ ],
+ "templating": {
+  "list": []
+ },
+ "annotations": {
+  "list": []
+ }
+}
