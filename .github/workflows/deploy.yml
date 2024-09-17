@@ -14,6 +14,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -24,17 +27,41 @@ jobs:
           cd backend/node
           npm install
 
-      - name: Build Docker image
+      - name: Build Docker images for backend and frontend
         run: |
-          docker build -t backend:latest ./backend/node
-
+          docker build -t backend-node:latest ./backend/node
+          docker build -t backend-django:latest ./backend/django_project
+          docker build -t frontend-angular:latest ./frontend/lyonmall-frontend
+          docker build -t frontend-react:latest ./frontend/react
+          
       - name: Log in to Docker Hub
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-
-      - name: Push Docker image to Docker Hub
+        
+      - name: Push Docker images to Docker Hub
         run: |
-          docker tag backend:latest ${{ secrets.DOCKER_USERNAME }}/backend:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
+          docker tag backend-node:latest ${{ secrets.DOCKER_USERNAME }}/backend-node:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/backend-node:latest
+          docker tag backend-django:latest ${{ secrets.DOCKER_USERNAME }}/backend-django:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/backend-django:latest
+          docker tag frontend-angular:latest ${{ secrets.DOCKER_USERNAME }}/frontend-angular:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/frontend-angular:latest
+          docker tag frontend-react:latest ${{ secrets.DOCKER_USERNAME }}/frontend-react:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/frontend-react:latest
+
+      - name: Set up Kubernetes
+        uses: azure/setup-kubectl@v1
+        with:
+          version: '1.21.0'
+
+      - name: Deploy to Kubernetes
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
+          kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/node-deployment.yaml
+          kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/django-deployment.yaml
+
+
+      - name: Notify
+        run: echo 'Build and deployment completed!'
