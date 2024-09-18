@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # ou "master", selon ta configuration
+      - main
 
 jobs:
   build:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Mettre à jour la version de Node.js si nécessaire
+          node-version: '18'
 
       - name: Install dependencies
         run: |
@@ -31,7 +31,6 @@ jobs:
           curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
-
 
       - name: Build Docker images for backend and frontend
         run: |
