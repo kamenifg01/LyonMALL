@@ -48,8 +48,8 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/backend-django:latest
           docker tag frontend-angular:latest ${{ secrets.DOCKER_USERNAME }}/frontend-angular:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend-angular:latest
-          docker tag frontend-react:latest ${{ secrets.DOCKER_USERNAME }}/frontend-react:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/frontend-react:latest
+         #docker tag frontend-react:latest ${{ secrets.DOCKER_USERNAME }}/frontend-react:latest
+          #docker push ${{ secrets.DOCKER_USERNAME }}/frontend-react:latest
 
       - name: Set up Kubernetes
         uses: azure/setup-kubectl@v1
