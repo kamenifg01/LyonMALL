@@ -32,7 +32,7 @@ jobs:
           docker build -t backend-node:latest ./backend/node
           docker build -t backend-django:latest ./backend/django_project
           docker build -t frontend-angular:latest ./frontend/lyonmall-frontend
-          docker build -t frontend-react:latest ./frontend/react
+         # <--docker build -t frontend-react:latest ./frontend/react
           
       - name: Log in to Docker Hub
         env:
