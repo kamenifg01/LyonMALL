@@ -27,6 +27,11 @@ jobs:
           cd backend/node
           npm install
 
+      - name: Set up Kubernetes
+        uses: azure/setup-kubectl@v1
+        with:
+          version: '1.24.0'
+
       - name: Build Docker images for backend and frontend
         run: |
           docker build -t backend-node:latest ./backend/node
