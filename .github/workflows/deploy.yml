@@ -26,10 +26,12 @@ jobs:
           cd backend/node
           npm install
 
-      - name: Set up Kubernetes CLI
-        uses: azure/setup-kubectl@v1
-        with:
-          version: '1.22.0'
+      - name: Install kubectl manually
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+
 
       - name: Build Docker images for backend and frontend
         run: |
@@ -53,7 +55,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend-angular:latest
 
       - name: Check Kubernetes cluster status
-        run: kubectl --kubeconfig=kubeconfig.yaml get nodes
+        run: kubectl get nodes --kubeconfig=kubeconfig.yaml
 
       - name: Deploy to Kubernetes
         run: |
