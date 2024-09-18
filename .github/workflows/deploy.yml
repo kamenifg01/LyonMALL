@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'  # Mettre à jour la version de Node.js si nécessaire
 
       - name: Install dependencies
         run: |
@@ -27,17 +27,15 @@ jobs:
           npm install
 
       - name: Set up Kubernetes CLI
-        run: |
-          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x ./kubectl
-          sudo mv ./kubectl /usr/local/bin/kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: '1.21.0'
 
       - name: Build Docker images for backend and frontend
         run: |
           docker build -t backend-node:latest ./backend/node
           docker build -t backend-django:latest ./backend/django_project
           docker build -t frontend-angular:latest ./frontend/lyonmall-frontend
-         # <--docker build -t frontend-react:latest ./frontend/react
           
       - name: Log in to Docker Hub
         env:
@@ -53,8 +51,9 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/backend-django:latest
           docker tag frontend-angular:latest ${{ secrets.DOCKER_USERNAME }}/frontend-angular:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend-angular:latest
-         #docker tag frontend-react:latest ${{ secrets.DOCKER_USERNAME }}/frontend-react:latest
-          #docker push ${{ secrets.DOCKER_USERNAME }}/frontend-react:latest
+
+      - name: Check Kubernetes cluster status
+        run: kubectl --kubeconfig=kubeconfig.yaml get nodes
 
       - name: Deploy to Kubernetes
         run: |
