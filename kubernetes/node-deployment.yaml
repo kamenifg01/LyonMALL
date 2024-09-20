@@ -11,9 +11,9 @@ spec:
     metadata:
       labels:
         app: node-app
-spec:
-  containers:
-    - name: node-app
+    spec:
+      containers:
+      - name: node-app
         image: node-app:latest
         resources:
           limits:
@@ -22,7 +22,6 @@ spec:
           requests:
             cpu: "250m"
             memory: "256Mi"
----
 apiVersion: v1
 kind: Service
 metadata:
