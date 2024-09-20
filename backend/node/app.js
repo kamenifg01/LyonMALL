@@ -5,6 +5,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import sequelize from './config/database.js';  // Utilise .js pour les imports relatifs
 import notificationRoutes from './routes/notificationRoutes.js';  // Assure-toi que le fichier utilise bien .js
+import livraisonRoutes from './routes/livraisonRoutes.js'; 
 
 const app = express();
 
@@ -12,6 +13,8 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use('/api/notifications', notificationRoutes);
+// Routes pour les livraisons
+app.use('/api/livraisons', livraisonRoutes);
 
 sequelize.sync()
   .then(() => console.log('Base de données synchronisée'))
