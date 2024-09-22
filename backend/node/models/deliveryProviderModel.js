@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
 const DeliveryProvider = sequelize.define('DeliveryProvider', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -7,4 +7,4 @@ const DeliveryProvider = sequelize.define('DeliveryProvider', {
   address: { type: DataTypes.STRING, allowNull: false },
 });
 
-module.exports = DeliveryProvider;
+export default DeliveryProvider;

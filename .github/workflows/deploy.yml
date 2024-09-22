@@ -1,10 +1,9 @@
-# .github/workflows/deploy.yml
 name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main  # ou "master", selon ta configuration
+      - main
 
 jobs:
   build:
@@ -20,19 +19,25 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
 
       - name: Install dependencies
         run: |
           cd backend/node
           npm install
 
+      - name: Install kubectl manually
+        run: |
+            KUBECTL_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+            curl -LO "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+            chmod +x ./kubectl
+            sudo mv ./kubectl /usr/local/bin/kubectl
+
       - name: Build Docker images for backend and frontend
         run: |
           docker build -t backend-node:latest ./backend/node
           docker build -t backend-django:latest ./backend/django_project
           docker build -t frontend-angular:latest ./frontend/lyonmall-frontend
-          docker build -t frontend-react:latest ./frontend/react
           
       - name: Log in to Docker Hub
         env:
@@ -48,20 +53,19 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/backend-django:latest
           docker tag frontend-angular:latest ${{ secrets.DOCKER_USERNAME }}/frontend-angular:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend-angular:latest
-          docker tag frontend-react:latest ${{ secrets.DOCKER_USERNAME }}/frontend-react:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/frontend-react:latest
 
-      - name: Set up Kubernetes
-        uses: azure/setup-kubectl@v1
-        with:
-          version: '1.21.0'
+      - name: Create kubeconfig.yaml
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
+          cat kubeconfig.yaml  # Pour vérifier que le fichier est bien généré
+
+      - name: Check Kubernetes cluster status
+        run: kubectl get nodes --kubeconfig=kubeconfig.yaml
 
       - name: Deploy to Kubernetes
         run: |
-          echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
           kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/node-deployment.yaml
           kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/django-deployment.yaml
-
 
       - name: Notify
         run: echo 'Build and deployment completed!'

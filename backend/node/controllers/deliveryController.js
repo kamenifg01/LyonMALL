@@ -1,7 +1,8 @@
-const Delivery = require('../models/deliveryModel');
-const DeliveryProvider = require('../models/deliveryProviderModel');
+import Delivery from '../models/deliveryModel.js';
+import DeliveryProvider from '../models/deliveryProviderModel.js';
 
-exports.assignDelivery = async (req, res) => {
+
+export const assignDelivery = async (req, res) => {
   const { orderId, providerId } = req.body;
 
   try {
@@ -12,7 +13,7 @@ exports.assignDelivery = async (req, res) => {
   }
 };
 
-exports.trackDelivery = async (req, res) => {
+export const trackDelivery = async (req, res) => {
   const { trackingNumber } = req.params;
 
   try {
