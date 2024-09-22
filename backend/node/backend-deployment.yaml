@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-backend-deployment
+spec:
+  replicas: 2  # Nombre initial de réplicas (instances)
+  selector:
+    matchLabels:
+      app: node-backend
+  template:
+    metadata:
+      labels:
+        app: node-backend
+    spec:
+      containers:
+      - name: node-backend
+        image: your-node-backend-image:latest  # Remplace par l'image Docker de ton backend
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: node-backend-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: node-backend-deployment
+  minReplicas: 2  # Minimum de réplicas
+  maxReplicas: 10  # Maximum de réplicas
+  targetCPUUtilizationPercentage: 80  # Quand l'usage CPU dépasse 80%, on crée plus de réplicas

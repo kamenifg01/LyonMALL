@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s  # Intervalles de collecte des données
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['node_exporter:9100']  # Metrics système via Node Exporter
+
+  # Ajoute d'autres jobs si nécessaire pour Nginx, Django, ou Node.js
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-container:80']  # Assurez-vous que le nom du conteneur est correct
+
+  - job_name: 'django'
+    static_configs:
+      - targets: ['django-container:8000']  # Assurez-vous que le nom du conteneur est correct
+
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-app:9100']  # Metrics système via Node Exporter
