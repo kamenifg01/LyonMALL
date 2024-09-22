@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Détails de la Livraison</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .container {
+            width: 70%;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #007bff;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        .detail-item {
+            margin: 10px 0;
+            font-size: 18px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .detail-item span {
+            font-weight: bold;
+            color: #333;
+        }
+        .status-delivered {
+            color: #28a745;
+        }
+        .status-pending {
+            color: #ffc107;
+        }
+        .status-canceled {
+            color: #dc3545;
+        }
+        .back-button {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+        #map {
+            height: 500px;
+            margin: 20px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+    </style>
+
+    <!-- Importation des bibliothèques OpenLayers et Leaflet -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.4.0/ol.css" type="text/css">
+    <script src="https://cdn.jsdelivr.net/npm/ol@v7.4.0/ol.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+</head>
+
+<body>
+    <h1>Détails de la Livraison</h1>
+
+    <div class="container">
+        {{livraison}}
+        {% if livraison %}
+        <h2>Détails de la Livraison</h2>
+        <p class="detail-item">Commande ID: <span>{{ livraison.commande_id }}</span></p>
+        <p class="detail-item">Prestataire: <span>{{ livraison.prestataire_id }}</span></p>
+        <p class="detail-item">Statut: <span class="{{ statut_class }}">{{ livraison.statut_livraison }}</span></p>
+        <p class="detail-item">Numéro de Suivi: <span>{{ livraison.numero_suivi }}</span></p>
+        <p class="detail-item">Date d'Envoi: <span>{{ livraison.date_envoi }}</span></p>
+        <p class="detail-item">Date de Livraison: <span>{{ livraison.date_livraison }}</span></p>
+        <p class="detail-item">Adresse de Livraison: <span>{{ livraison.commande_id.utilisateur.adresse }}</span></p>
+        <div id="map"></div>
+        <button class="back-button" onclick="history.back()">Retour</button>
+        {% elif commande %}
+        <h2>Détails de la Commande</h2>
+        <p class="detail-item">Commande ID: <span>{{ commande.id }}</span></p>
+        <p class="detail-item">Client: <span>{{ commande.utilisateur.nom }}</span></p>
+        <p class="detail-item">Adresse: <span>{{ commande.utilisateur.adresse }}</span></p>
+        <p class="detail-item">Date de Commande: <span>{{ commande.date_commande }}</span></p>
+        <p class="detail-item">Total: <span>{{ commande.total }} €</span></p>
+        <p class="detail-item">Statut: <span class="{{ statut_class }}">{{ commande.statut }}</span></p>
+        <div id="map"></div>
+        <button class="back-button" onclick="history.back()">Retour</button>
+        {% else %}
+        <p>Aucune information disponible.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        // Initialisation de la carte avec Leaflet
+        var map = L.map('map').setView([46, 2.5], 5); // Coordonnées de la France
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Fonction pour convertir une adresse en coordonnées
+        function convertAddressToLatLng(address) {
+            return new Promise((resolve, reject) => {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${address}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            resolve({
+                                lat: data[0].lat,
+                                lng: data[0].lon
+                            });
+                        } else {
+                            reject('Adresse introuvable');
+                        }
+                    })
+                    .catch(err => reject(err));
+            });
+        }
+
+        // Fonction pour calculer et afficher l'itinéraire
+        async function calculateRoute(destinationAddress) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async function (position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+
+                    try {
+                        const destinationCoords = await convertAddressToLatLng(destinationAddress);
+                        const latDestination = destinationCoords.lat;
+                        const lngDestination = destinationCoords.lng;
+
+                        L.Routing.control({
+                            waypoints: [
+                                L.latLng(userLat, userLng),
+                                L.latLng(latDestination, lngDestination)
+                            ],
+                            routeWhileDragging: true
+                        }).addTo(map);
+                    } catch (error) {
+                        console.error('Erreur lors de la récupération des coordonnées:', error);
+                    }
+                });
+            } else {
+                alert("La géolocalisation n'est pas supportée par ce navigateur.");
+            }
+        }
+
+        // Lancer le calcul d'itinéraire si l'adresse est disponible
+        document.addEventListener('DOMContentLoaded', function () {
+            {% if livraison %}
+            const address = "{{ livraison.commande_id.utilisateur.adresse }}";
+            calculateRoute(address);
+            {% elif commande %}
+            const address = "{{ commande.utilisateur.adresse }}";
+            calculateRoute(address);
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

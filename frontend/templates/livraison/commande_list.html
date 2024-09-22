@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Liste des Commandes</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f9;
+      }
+      h1,
+      h2 {
+        color: #333;
+        text-align: center;
+      }
+      .container {
+        width: 80%;
+        margin: 0 auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #f4f4f4;
+      }
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+      .status {
+        font-weight: bold;
+      }
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+      }
+      .action-buttons button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #fff;
+      }
+      .action-buttons .view-btn {
+        background-color: #007bff;
+      }
+      .action-buttons .choose-btn {
+        background-color: #28a745;
+      }
+      .action-buttons .view-btn:hover {
+        background-color: #0056b3;
+      }
+      .action-buttons .choose-btn:hover {
+        background-color: #218838;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Liste des Commandes</h1>
+
+      <!-- Section des commandes "À livrer" -->
+      <h2>Commandes À Livrer</h2>
+      <table id="commandes-a-livrer-table">
+        <thead>
+          <tr>
+            <th>ID Commande</th>
+            <th>Nom Client</th>
+            <th>Adresse Livraison</th>
+            <th>Date de Commande</th>
+            <th>Total (€)</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="commandes-a-livrer-list">
+          <!-- Les commandes à livrer seront insérées ici -->
+        </tbody>
+      </table>
+
+      <!-- Section des commandes "Livrées" -->
+      <h2>Commandes Livrées</h2>
+      <table id="commandes-livrees-table">
+        <thead>
+          <tr>
+            <th>ID Commande</th>
+            <th>Nom Client</th>
+            <th>Adresse Livraison</th>
+            <th>Date de Commande</th>
+            <th>Total (€)</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="commandes-livrees-list">
+          <!-- Les commandes livrées seront insérées ici -->
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      function fetchCommandes() {
+        fetch("/api/commandes/")
+          .then((response) => response.json())
+          .then((data) => {
+            const commandesALivrerList = document.getElementById(
+              "commandes-a-livrer-list"
+            );
+            const commandesLivreesList = document.getElementById(
+              "commandes-livrees-list"
+            );
+
+            commandesALivrerList.innerHTML = "";
+            commandesLivreesList.innerHTML = "";
+
+            if (data.length === 0) {
+              commandesALivrerList.innerHTML =
+                "<tr><td colspan='7' style='text-align: center;'>Aucune commande disponible.</td></tr>";
+              commandesLivreesList.innerHTML =
+                "<tr><td colspan='6' style='text-align: center;'>Aucune commande livrée.</td></tr>";
+            } else {
+              data.forEach((commande) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                            <td>${commande.id}</td>
+                            <td>${commande.client.nom}</td>
+                            <td>${commande.client.adresse}</td>
+                            <td>${new Date(
+                              commande.date_commande
+                            ).toLocaleDateString()}</td>
+                            <td>${commande.total}€</td>
+                            <td class="status">${commande.statut}</td>
+                            <td class="action-buttons">
+                                <button class="view-btn" onclick="viewDetails(${
+                                  commande.id
+                                })">Voir</button>
+                                ${
+                                  commande.statut === "À livrer"
+                                    ? `<button class="choose-btn" onclick="chooseCommande(${commande.id})">Choisir</button>`
+                                    : ""
+                                }
+                            </td>
+                        `;
+                if (commande.statut === "À livrer") {
+                  commandesALivrerList.appendChild(row);
+                } else if (commande.statut === "Livrée") {
+                  commandesLivreesList.appendChild(row);
+                }
+              });
+            }
+          })
+          .catch((error) => console.error("Error fetching commandes:", error));
+      }
+
+      function viewDetails(id) {
+        window.location.href = `/livraison/livraison/${id}/`;
+      }
+
+      function chooseCommande(id) {
+        const csrftoken = getCookie("csrftoken");
+
+        fetch(`/livraison/creer_livraison/${id}/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          body: JSON.stringify({
+            commande_id: id,
+          }),
+        })
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error("Erreur lors de la création de la livraison.");
+            }
+          })
+          .then((data) => {
+            window.location.href = `/livraison/livraison/${data.livraison_id}/`;
+          })
+          .catch((error) => {
+            console.error("Erreur:", error);
+            alert("Erreur lors de la création de la livraison.");
+          });
+      }
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      // Lancer la fonction fetchCommandes lors du chargement de la page
+      fetchCommandes();
+    </script>
+  </body>
+</html>

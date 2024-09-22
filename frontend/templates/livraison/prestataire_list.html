@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Liste des Prestataires</title>
+</head>
+<body>
+    <h1>Liste des Prestataires</h1>
+    <ul>
+        {% for prestataire in prestataires %}
+            <li>{{ prestataire.nom }} - {{ prestataire.adresse }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
