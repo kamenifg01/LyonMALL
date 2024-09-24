@@ -1,0 +1,23 @@
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>mes commandes</title>
+</head>
+<body>
+    
+
+    <h1>Mes Commandes</h1>
+    <ul>
+        {% for commande in commandes %}
+            <li>
+                Commande {{ commande.id }} - Statut : {{ commande.statut }} - Total : {{ commande.total }}€
+                <a href="{% url 'suivre_commande' commande.id %}">Voir détails</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>

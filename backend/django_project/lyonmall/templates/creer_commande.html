@@ -1,0 +1,61 @@
+<!-- templates/creer_commande.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Créer une commande</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-4">Créer une commande</h1>
+
+        {% if error %}
+            <div class="bg-red-500 text-white p-2 rounded mb-4">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {{ form.as_p }}  <!-- Affiche le formulaire comme des paragraphes -->
+
+            <h2 class="text-xl font-semibold mt-6 mb-2">Votre panier</h2>
+            {% if cart %}
+                <table class="w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr>
+                            <th class="text-left border border-gray-300">Produit</th>
+                            <th class="text-right border border-gray-300">Quantité</th>
+                            <th class="text-right border border-gray-300">Prix</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart %}
+                            <tr>
+                                <td class="border border-gray-300">{{ item.product_name }}</td>
+                                <td class="text-right border border-gray-300">{{ item.quantity }}</td>
+                                <td class="text-right border border-gray-300">{{ item.price }}€</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="font-bold">
+                            <td colSpan="2" class="text-right border border-gray-300">Total :</td>
+                            <td class="text-right border border-gray-300">{{ total_amount }}€</td>  <!-- Total dynamique -->
+                        </tr>
+                    </tfoot>
+                </table>
+            {% else %}
+                <p>Aucun produit dans le panier.</p>
+            {% endif %}
+
+            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                Valider la commande
+            </button>
+        </form>
+
+        <p class="mt-4">
+            <a href="{% url 'mes_commandes' %}" class="text-blue-500">Retour à mes commandes</a>
+        </p>
+    </div>
+</body>
+</html>
