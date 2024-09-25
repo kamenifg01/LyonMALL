@@ -1,0 +1,60 @@
+<!-- success.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement réussi !</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <style>
+        /* Ensure the SVG logo scales properly */
+        .icon {
+            width: 80px; /* Set a fixed width */
+            height: 80px; /* Set a fixed height */
+            margin: 0 auto; /* Center the icon */
+        }
+
+        .container {
+            max-width: 600px; /* Limit the width of the container */
+            margin: 0 auto; /* Center the container */
+            padding: 20px; /* Add padding */
+        }
+
+        h1 {
+            font-size: 1.5rem; /* Adjust font size for responsiveness */
+        }
+
+        p {
+            font-size: 1rem; /* Adjust font size for readability */
+        }
+
+        button {
+            width: 100%; /* Make the button full-width on small screens */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-4 text-center">
+        <div class="icon text-green-500 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="lucide lucide-check-circle" viewBox="0 0 24 24">
+                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-1 14-5-5 1.5-1.5L11 13l7-7 1.5 1.5z"/>
+            </svg>
+        </div>
+        <h1 class="text-2xl font-bold mb-4">Paiement réussi !</h1>
+        <p class="mb-4">Votre commande a été confirmée et sera bientôt expédiée.</p>
+        {% if commande %}
+            <p class="mb-4">Numéro de commande : #{{ commande.id }}</p>
+        {% endif %}
+        <button class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" onclick="window.location.href='{% url 'mes_commandes' %}'">
+            Voir mes commandes
+        </button>
+    </div>
+    <section class="container mx-auto text-center">
+        <p>
+            Nous apprécions votre commande ! Si vous avez des questions, veuillez envoyer un email à
+            <a href="mailto:orders@example.com">orders@example.com</a>.
+        </p>
+    </section>
+</body>
+</html>

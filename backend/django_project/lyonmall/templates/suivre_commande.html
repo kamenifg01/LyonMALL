@@ -1,0 +1,34 @@
+<!-- templates/suivre_commande.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Suivi de la commande</title>
+</head>
+<body>
+    <h1>Détails de la commande {{ commande.id }}</h1>
+
+    <p><strong>Utilisateur :</strong> {{ commande.utilisateur.username }}</p>
+    <p><strong>Date de commande :</strong> {{ commande.date_commande }}</p>
+    <p><strong>Statut :</strong> {{ commande.statut }}</p>
+    <p><strong>Total :</strong> {{ commande.total }} EUR</p>
+
+    <h2>Produits de la commande</h2>
+    <ul>
+        {% for produit in commande.produits.all %}
+            <li>{{ produit.produit.nom }} - {{ produit.quantite }} x {{ produit.produit.prix }} EUR</li>
+        {% empty %}
+            <li>Aucun produit dans cette commande.</li>
+        {% endfor %}
+    </ul>
+
+    {% if commande.statut == 'pending' %}
+        <form method="post" action="{% url 'annuler_commande' commande.id %}">
+            {% csrf_token %}
+            <button type="submit">Annuler la commande</button>
+        </form>
+    {% endif %}
+
+    <p><a href="{% url 'mes_commandes' %}">Retour à mes commandes</a></p>
+</body>
+</html>

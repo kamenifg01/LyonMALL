@@ -1,22 +1,29 @@
-"""
-URL configuration for lyonmall project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 
+from .views.projet_views import (
+    ajouter_au_panier,
+    retirer_du_panier,
+    afficher_panier,
+    creer_commande,
+    suivre_commande,
+    liste_commandes,
+    annuler_commande,
+    create_checkout_session,
+    success,
+    cancel
+)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('ajouter_au_panier/<int:produit_id>/', ajouter_au_panier, name='ajouter_au_panier'),
+    path('retirer_du_panier/<int:produit_id>/', retirer_du_panier, name='retirer_du_panier'),
+    path('afficher_panier/', afficher_panier, name='afficher_panier'),
+    path('creer_commande/', creer_commande, name='creer_commande'),
+    path('suivre/<int:commande_id>/', suivre_commande, name='suivre_commande'),
+    path('annuler/<int:commande_id>/', annuler_commande, name='annuler_commande'),
+    path('mes_commandes/', liste_commandes, name='mes_commandes'),
+    path('checkout/<int:commande_id>/', create_checkout_session, name='checkout'),
+    path('success/', success, name='success'),
+    path('cancel/', cancel, name='cancel'),
 ]
