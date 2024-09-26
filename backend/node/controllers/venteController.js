@@ -1,12 +1,9 @@
-import connection from "../config/database.js";
-
-// Connexion à la base de données
-connection.connect();
+import connection from "../config/database.js"; 
 
 // Ajouter une vente
 const ajouterVente = async (req, res) => {
     const { produit_id, quantite } = req.body;
-    connection.query = `
+    const query = `
         INSERT INTO ventes (produit_id, quantite, date_vente)
         VALUES ($1, $2, CURRENT_TIMESTAMP) RETURNING *;
     `;
@@ -22,7 +19,7 @@ const ajouterVente = async (req, res) => {
 
 // Obtenir toutes les ventes
 const getVentes = async (req, res) => {
-    connection.query = `
+    const query = `
         SELECT v.vente_id, p.nom AS produit, v.quantite, v.date_vente, p.prix
         FROM ventes v
         JOIN produits p ON v.produit_id = p.produit_id;
@@ -38,7 +35,7 @@ const getVentes = async (req, res) => {
 
 // Statistiques : ventes par jour
 const getVentesParJour = async (req, res) => {
-    connection.query = `
+    const query = `
         SELECT DATE(v.date_vente) AS jour, SUM(v.quantite) AS total_quantite, SUM(p.prix * v.quantite) AS total_ventes
         FROM ventes v
         JOIN produits p ON v.produit_id = p.produit_id
@@ -56,7 +53,7 @@ const getVentesParJour = async (req, res) => {
 
 // Statistiques : produits les plus vendus
 const getProduitsPopulaires = async (req, res) => {
-    connection.query = `
+    const query = `
         SELECT p.nom, SUM(v.quantite) AS total_vendu
         FROM ventes v
         JOIN produits p ON v.produit_id = p.produit_id
@@ -74,6 +71,4 @@ const getProduitsPopulaires = async (req, res) => {
 };
 
 // Exportation des fonctions
-export { ajouterVente, getVentes, getVentesParJour, getProduitsPopulaires };
-
-
+export default { ajouterVente, getVentes, getVentesParJour, getProduitsPopulaires };

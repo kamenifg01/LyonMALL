@@ -1,11 +1,12 @@
 import express from 'express';
-import ProduitController from '../controllers/produitController';
+import { ajouterProduit, modifierProduit, supprimerProduit, getProduits } from '../controllers/productController.js';
+
 const router = express.Router();
 
 // Routes pour gérer les produits
-router.post('/', ProduitController.ajouterProduit);
-router.put('/:produit_id', ProduitController.modifierProduit);
-router.delete('/:produit_id', ProduitController.supprimerProduit);
-router.get('/', ProduitController.getProduits);
+router.post('/', ajouterProduit);
+router.put('/:produit_id', modifierProduit);
+router.delete('/:produit_id', supprimerProduit);
+router.get('/', getProduits);
 
 export default router;

@@ -11,7 +11,11 @@ from .views.projet_views import (
     annuler_commande,
     create_checkout_session,
     success,
-    cancel
+    cancel,
+    rembourser_commande,
+    modifier_quantite_panier,
+    vider_panier
+    
 )
 
 urlpatterns = [
@@ -26,4 +30,7 @@ urlpatterns = [
     path('checkout/<int:commande_id>/', create_checkout_session, name='checkout'),
     path('success/', success, name='success'),
     path('cancel/', cancel, name='cancel'),
+    path('rembourser-commande/<int:commande_id>/',rembourser_commande, name='rembourser_commande'),
+    path('modifier_quantite_panier/<int:produit_id>/', modifier_quantite_panier, name='modifier_quantite_panier'),
+    path('vider_panier/', vider_panier, name='vider_panier'),
 ]

@@ -8,6 +8,9 @@ from ..models.models_commande import Panier, Produits, Commandes, CommandeProdui
 import stripe
 from django.views.decorators.csrf import csrf_exempt
 
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
 logger = logging.getLogger(__name__)
 
 # Constantes pour les messages d'erreur
@@ -29,6 +32,7 @@ def check_empty_cart(view_func):
             return JsonResponse({'error': PANIER_VIDE_ERROR}, status=400)
         return view_func(request, *args, **kwargs)
     return wrapper
+
 @csrf_exempt
 @login_required
 def ajouter_au_panier(request, produit_id):
@@ -42,6 +46,7 @@ def ajouter_au_panier(request, produit_id):
         article_panier.save()
 
     return JsonResponse({"message": "Produit ajouté au panier", "quantite": article_panier.quantite})
+
 @csrf_exempt
 @login_required
 def retirer_du_panier(request, produit_id):
@@ -69,6 +74,80 @@ def afficher_panier(request):
         for item in panier.articles.all()
     ]
     return JsonResponse({"articles": articles, "prix_total": panier.calculer_total()})
+
+@login_required
+@csrf_exempt
+def modifier_quantite_panier(request, produit_id):
+    """Modifie la quantité d'un produit dans le panier de l'utilisateur"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Méthode non autorisée'}, status=405)
+    
+    panier = get_user_cart(request.user)
+    produit = get_object_or_404(Produits, id=produit_id)
+    
+    try:
+        nouvelle_quantite = int(request.POST.get('quantite', 0))
+        if nouvelle_quantite < 0:
+            return JsonResponse({'error': 'La quantité doit être positive'}, status=400)
+        
+        article_panier, created = ArticlePanier.objects.get_or_create(panier=panier, produit=produit)
+        
+        if nouvelle_quantite == 0:
+            article_panier.delete()
+            message = "Produit retiré du panier"
+        else:
+            article_panier.quantite = nouvelle_quantite
+            article_panier.save()
+            message = "Quantité mise à jour"
+        
+        return JsonResponse({
+            'message': message,
+            'produit_id': produit_id,
+            'nouvelle_quantite': nouvelle_quantite,
+            'prix_total_panier': panier.calculer_total()
+        })
+    except ValueError:
+        return JsonResponse({'error': 'Quantité invalide'}, status=400)
+
+@login_required
+@csrf_exempt
+def vider_panier(request):
+    """Vide le panier de l'utilisateur"""
+    panier = get_user_cart(request.user)
+    
+    if request.method == 'POST':
+        panier.articles.all().delete()
+        return JsonResponse({'message': 'Panier vidé'})
+    return JsonResponse({'error': 'Méthode non autorisée'}, status=405)
+
+@login_required
+@csrf_exempt
+@check_empty_cart
+def resume_panier(request):
+    """Résume le contenu du panier avant validation"""
+    panier = get_user_cart(request.user)
+    articles = [
+        {
+            "produit_id": item.produit.id,
+            "nom": item.produit.nom,
+            "quantite": item.quantite,
+            "prix_unitaire": item.produit.prix,
+            "prix_total": item.calculer_total(),
+        }
+        for item in panier.articles.all()
+    ]
+    
+    total_panier = panier.calculer_total()
+    frais_livraison = 5.99  # À ajuster selon votre logique de frais de livraison
+    total_commande = total_panier + frais_livraison
+    
+    return JsonResponse({
+        "articles": articles,
+        "sous_total": total_panier,
+        "frais_livraison": frais_livraison,
+        "total_commande": total_commande,
+        "nombre_articles": sum(item['quantite'] for item in articles)
+    })
 
 @login_required
 @csrf_exempt
@@ -128,6 +207,40 @@ def annuler_commande(request, commande_id):
         commande.statut = 'cancelled'
         commande.save()
     return JsonResponse({'message': 'Commande annulée'})
+
+@login_required
+@csrf_exempt
+def retourner_commande(request, commande_id):
+    """Permet à l'utilisateur de retourner une commande spécifique"""
+    commande = get_object_or_404(Commandes, pk=commande_id, utilisateur=request.user)
+    if commande.statut == 'shipped':
+        commande.statut = 'returned'
+        commande.save()
+        return JsonResponse({'message': 'Commande retournée'})
+    return JsonResponse({'error': 'Impossible de retourner cette commande'}, status=400)
+@login_required
+@csrf_exempt
+def rembourser_commande(request, commande_id):
+    try:
+        commande = Commandes.objects.get(id=commande_id, utilisateur=request.user)
+        
+        # Vérifier que la commande a bien un payment_intent_id ou un charge_id
+        if not commande.payment_intent_id:
+            return JsonResponse({'error': 'Aucun payment_intent_id trouvé pour cette commande.'}, status=400)
+
+        # Créer un remboursement via l'API Stripe
+        refund = stripe.Refund.create(payment_intent=commande.payment_intent_id)
+
+        # Mettre à jour le statut de la commande
+        commande.statut = 'refunded'
+        commande.save()
+
+        return JsonResponse({'message': 'Commande remboursée', 'refund_id': refund['id']})
+    except stripe.error.StripeError as e:
+        return JsonResponse({'error': f"Erreur Stripe: {str(e)}"}, status=500)
+    except Exception as e:
+        return JsonResponse({'error': f"Erreur inattendue: {str(e)}"}, status=500)
+
 
 @login_required
 @csrf_exempt
@@ -193,8 +306,15 @@ def checkout(request):
         for item in panier.articles.all()
     ]
 
-    return JsonResponse({
-        'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
-        'articles': articles,
-        'prix_total': panier.calculer_total(),
-    })
+    try:
+        # Ajoutez des logs pour déboguer
+        print("Données de la requête:", request.POST)
+        
+        # Votre logique de paiement ici
+        
+        # Assurez-vous de retourner une réponse HTTP valide
+        return JsonResponse({"message": "Paiement réussi"}, status=200)
+    except Exception as e:
+        # Loggez l'erreur pour plus d'informations
+        print("Erreur lors du checkout:", str(e))
+        return JsonResponse({"error": "Une erreur est survenue lors du paiement"}, status=500)

@@ -1,5 +1,6 @@
 version: '3'
 services:
+  # Service Prometheus
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -8,6 +9,7 @@ services:
     ports:
       - "9090:9090"
 
+  # Service Grafana
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -18,11 +20,24 @@ services:
     depends_on:
       - prometheus
 
+  # Node Exporter pour surveiller les performances du système hôte
   node_exporter:
     image: prom/node-exporter:latest
     container_name: node_exporter
     ports:
       - "9100:9100"
+
+  # Service Locust (Master)
+  locust:
+    image: locustio/locust:latest
+    container_name: locust
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./locust/locustfile.py:/mnt/locust/locustfile.py
+    environment:
+      LOCUST_MODE: master
+    command: locust -f /mnt/locust/locustfile.py --host=http://your-django-app-url
 
 volumes:
   grafana-storage:

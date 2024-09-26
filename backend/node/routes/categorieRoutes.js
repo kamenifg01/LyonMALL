@@ -1,11 +1,12 @@
 import express from 'express';
-import CategorieController from '../controllers/categorieController';
+import { ajouterCategorie, modifierCategorie, supprimerCategorie, getAllCategories } from '../controllers/categorieController.js';
+
 const router = express.Router();
 
 // Routes pour gérer les catégories
-router.post('/', CategorieController.ajouterCategorie);
-router.put('/:categorie_id', CategorieController.modifierCategorie);
-router.delete('/:categorie_id', CategorieController.supprimerCategorie);
-router.get('/', CategorieController.getCategories);
+router.post('/', ajouterCategorie);
+router.put('/:categorie_id', modifierCategorie);
+router.delete('/:categorie_id', supprimerCategorie);
+router.get('/', getAllCategories);
 
 export default router;

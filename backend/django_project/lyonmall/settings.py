@@ -17,6 +17,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#q4l!k*-5s^t1hfm9x!e=y*c0-!t2g26)2q_sfv%y8_%zlzz+$'
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
+# settings.py
+STRIPE_SUCCESS_URL = 'http://localhost:8000/success/'
+STRIPE_CANCEL_URL = 'http://localhost:8000/cancel/'
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -67,6 +71,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'lyonmall.wsgi.application'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',  # Modifie l'URL selon ta configuration
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
 
 
 # Database

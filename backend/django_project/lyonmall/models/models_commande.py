@@ -30,9 +30,11 @@ class Commandes(models.Model):
         ('cancelled', 'Annulée'),
     ]
     utilisateur = models.ForeignKey(User, on_delete=models.CASCADE)
-    statut = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
+    statut = models.CharField(max_length=20)
     date_commande = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    charge_id = models.CharField(max_length=100, null=True, blank=True)  # Ajoutez cette ligne
+    payment_intent_id = models.CharField(max_length=255, null=True, blank=True)  # Ajoutez ce champ
 
     def recalculer_total(self):
         total = sum(item.produit.prix * item.quantite for item in self.produits.all())

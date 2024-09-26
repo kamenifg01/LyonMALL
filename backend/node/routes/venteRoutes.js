@@ -1,5 +1,5 @@
 import express from 'express';
-import VenteController from '../controllers/venteController';
+import VenteController from '../controllers/venteController.js';
 const router = express.Router();
 
 // Routes pour gérer les ventes
